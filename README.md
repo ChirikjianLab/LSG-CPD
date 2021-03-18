@@ -19,8 +19,8 @@ Main codes are contained within __LSGCPD.m__.
 
 
 ## TODO
-- [] Demo for multi-view object modeling
-- [] Demo for Stanford Lounge dataset
+- [ ] Demo for multi-view object modeling
+- [ ] Demo for Stanford Lounge dataset
 - [x] Demo for Outlier Experiments
 - [x] Demo for Kitti Dataset
 
