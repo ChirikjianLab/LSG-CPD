@@ -5,67 +5,59 @@
 
 function [tform] = LSGCPD(source, target, parm, varargin)
 
-% Coefficients-------------------------------------------------------------
-% Neighbors to estimate normal and minimum eigenvalue 
-Neighbours = 30; 
-                 % outlier 30 
-                 % noise 30
-                 % lounge 30/10
-                 % multiview 10 (5/30/5) 
-                 % Kitti 10           
-% point to plane/point penalty ratio limit
-limit = 30;      
-                 % outlier 1
-                 % noise 1
-                 % lounge 30
-                 % multiview 30
-                 % Kitti 30
-           
-lambda = 0.2;
-                 % outlier 0.2
-                 % noise 0.2
-                 % lounge 0.2
-                 % multiview 0.2
-                 % Kitti 0.2
-% Read Data----------------------------------------------------------------
+% --------------- Load Data ---------------
 X = gpuArray(source.Location); % source
 Y = gpuArray(target.Location); % target (GMM)
+
+% volume of bounding cube
 V = 1 ^ 3 * (max(Y(:, 1)) - min(Y(:, 1))) *  ...
     (max(Y(:, 2)) - min(Y(:, 2))) * ...
-    (max(Y(:, 3)) - min(Y(:, 3))); % volume of bounding cube
-% Confidence Filtering--------------------------------------------------------
+    (max(Y(:, 3)) - min(Y(:, 3))); 
+
+% --------------- Confidence Filtering ---------------
 if parm.weight ~= 0
-    X_dist = X(:, 3);
-    Y_dist = Y(:, 3);
-    confidence_X = confidence_filter(X_dist);
-    confidence_Y = confidence_filter(Y_dist);
-    X = X(confidence_X > parm.weight_Gaussian_truncate, :);
-    Y = Y(confidence_Y > parm.weight_Gaussian_truncate, :);
-    confidence_X = confidence_X(confidence_X > parm.weight_Gaussian_truncate, :);
-    confidence_Y = confidence_Y(confidence_Y > parm.weight_Gaussian_truncate, :);
-    N = size(X, 1); % get size of source point cloud
-    M = size(Y, 1); % get size of target point cloud     
+    % Depth of points
+    X_depth = X(:, 3);
+    Y_depth = Y(:, 3);
+    
+    % Confidence of points
+    confidence_X = confidence_filter(X_depth);
+    confidence_Y = confidence_filter(Y_depth);
+    
+    % Truncate the points if confidence < threshold
+    X = X(confidence_X > parm.truncate_threshold, :);
+    Y = Y(confidence_Y > parm.truncate_threshold, :);
+    % Truncate the corresponding confidence
+    confidence_X = confidence_X(confidence_X > parm.truncate_threshold, :);
+    confidence_Y = confidence_Y(confidence_Y > parm.truncate_threshold, :);
+    
+    % Size of points
+    N = size(X, 1); 
+    M = size(Y, 1);
+    
+    % Compute surface normal and variation
     [Normal_cpu, Curvature] = findPointNormals(gather(Y), parm.neighbours);  
+    
+    % pi(m)
     f_Y = confidence_Y ./ sum(confidence_Y);
 else
-    N = size(X, 1); % get size of source point cloud
-    M = size(Y, 1); % get size of target point cloud
+    % Size of points
+    N = size(X, 1);
+    M = size(Y, 1); 
+    
+    % Confidence is simply one if not weighted
     confidence_X = ones(N, 1);
+    
+    % Compute surface normal and variation
     [Normal_cpu, Curvature] = findPointNormals(target.Location, parm.neighbours);
+    
+    % pi(m)
     f_Y = single(ones(size(Y, 1), 1)) ./ size(Y, 1);
 end
 
 Normal = gpuArray(Normal_cpu);
 
-% Rescale------------------------------------------------------------------
-if parm.rescale == 1
-    scale = V ^ (1 / 3);
-    X = X ./ scale;
-    Y = Y ./ scale;
-    scale = gather(scale);
-    V = 1;
-end
-% Compute centroid and xform to centroid-----------------------------------
+% --------------- Compute centroid and xform to centroid ---------------
 if parm.mean_xform == 1
     % normalize to zero mean
     xmean = mean(X);
@@ -77,7 +69,7 @@ if parm.mean_xform == 1
 end
 
 
-% Pre-calculations and transpose of locations------------------------------
+% --------------- Pre-calculations and transpose of locations ---------------
 Y_Normal = arrayfun(@(a1, a2, a3, b1, b2, b3) a1 * b1 + a2 * b2 + a3 * b3, ...
     Y(:, 1), Y(:, 2), Y(:, 3), Normal(:, 1), Normal(:, 2), Normal(:, 3));
 
@@ -98,7 +90,7 @@ E1X_cpu = gather(E1 * X);
 E2X_cpu = gather(E2 * X);
 E3X_cpu = gather(E3 * X);
 
-% initialize sigma2--------------------------------------------------------
+% --------------- Initialize sigma2 ---------------
 if parm.sigma2 ~= 0
     sigma2 = parm.sigma2;
 else
@@ -173,9 +165,7 @@ end
 if parm.mean_xform == 1
     t = t + ymean' - (R * xmean');
 end
-if parm.rescale == 1
-    t = t * scale;
-end
+
 % return transform
 tform = rigid3d(R', t');
 

@@ -24,7 +24,6 @@ parm.tolerance = 1e-5; % EM loglikelihood tolerance
 parm.sigma2 = 0;
 parm.w = 0.5; % outlier_ratio
 parm.mean_xform = 1; % translate to the mean position
-parm.rescale = 0;
 parm.weight = 0;
 parm.opti_maxIter = 10; % max iteration for optimization
 parm.opti_tolerance = 1e-3; % tolerance fot optimization
