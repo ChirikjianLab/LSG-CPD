@@ -15,13 +15,10 @@ Main codes are contained within __LSGCPD.m__.
 
 ## Usage
 1. Outlier Experiment: run  __main_outlier.m__
-2. Kitti Experiment: run __main_kitti.m__
+2. Multi-view Experiment: in __main_multiveiw.m__, set the model and the corresponding view number you want to play with. And just run the script.
+3. Lounge Experiment: run __main_lounge.m__
+4. Kitti Experiment: run __main_kitti.m__
 
 
 ## TODO
-- [ ] Demo for multi-view object modeling
-- [ ] Demo for Stanford Lounge dataset
-- [x] Demo for Outlier Experiments
-- [x] Demo for Kitti Dataset
-
 We are also working on implementing the method on C++. Stay tuned.
