@@ -8,9 +8,9 @@ Compared to the original CPD (Link to CPD paper), it takes into account the loca
 ## Installation
 1. Install Matlab
 2. Install the following matlab toolbox
-..- Computer Vision Toolbox
-..- Parallel Computing Toolbox
-..- Statistics and Machine Learning Toolbox
+⋅⋅- Computer Vision Toolbox
+⋅⋅- Parallel Computing Toolbox
+⋅⋅- Statistics and Machine Learning Toolbox
 
 ## Usage
 1. Outlier Experiment
