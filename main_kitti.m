@@ -1,5 +1,5 @@
 % LSG-CPD: CPD with Local Surface Geometry
-% Demo of Outlier Experiment
+% Demo of Kitti Experiment
 % Author: Weixiao Liu, Hongtao Wu 
 % Johns Hopkins University & National University of Singapore
 
@@ -65,7 +65,7 @@ pcshow(pc_init)
 parm.maxIter = 50; % EM max iteration
 parm.tolerance = 1e-2; % EM loglikelihood tolerance
 parm.sigma2 = 0; % sigma is autonomously evaluated
-parm.w = 0.5; % outlier_ratio
+parm.w = 0.05; % outlier_ratio
 parm.mean_xform = 0; % translate to the mean position
 parm.weight = 0;
 parm.opti_maxIter = 2; % max iteration for optimization

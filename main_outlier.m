@@ -28,7 +28,7 @@ parm.weight = 0;
 parm.opti_maxIter = 10; % max iteration for optimization
 parm.opti_tolerance = 1e-3; % tolerance fot optimization
 parm.neighbours = 30; % Neighbour
-parm.alimit = 30; % Alpha max
+parm.alimit = 1; % Alpha max
 parm.lambda = 0.2; % lambda
 
 tic
