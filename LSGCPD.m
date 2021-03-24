@@ -107,7 +107,7 @@ vol = (a + 1) .^ (1 / 2);
 f_Y = f_Y .* vol;
 % estimate outlier weight--------------------------------------------------
 w0 = V * parm.w * reshape(f_Y, 1, []) * ...
-    single((2 * pi * sigma2) ^ (- 3 / 2) .* (a + 1) .^ (- 1 / 2)); 
+    single((2 * pi * sigma2) ^ (- 3 / 2) .* (a + 1) .^ (1 / 2)); 
 w0 = w0 / (1 - parm.w + w0);
 wn = reshape(1 - (1 - w0) .* confidence_X, 1, []);
 f_X = (1 - wn) ./ wn;
