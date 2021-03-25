@@ -11,7 +11,7 @@ clear
 clc
 close all
 
-model_name = "Dragon";
+model_name = "Happy";
 num_pc = 15;
 
 % --------------- Load data ---------------
@@ -33,10 +33,10 @@ title('Randomly Initialized Point Clouds')
 parm.maxIter = 50; % EM max iteration
 parm.tolerance = 1e-5; % EM loglikelihood tolerance
 parm.sigma2 = 0;
-parm.w = 0.9; % outlier_ratio
+parm.w = 0.5; % outlier_ratio
 parm.mean_xform = 0; % translate to the mean position
 parm.weight = 0;
-parm.opti_maxIter = 5; % max iteration for optimization
+parm.opti_maxIter = 2; % max iteration for optimization
 parm.opti_tolerance = 1e-3; % tolerance fot optimization
 parm.neighbours = 10;
 parm.alimit = 30;

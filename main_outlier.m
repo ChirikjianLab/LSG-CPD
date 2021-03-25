@@ -20,21 +20,18 @@ pcshowpair(pc_target, pc_source);
 
 % Registration
 parm.maxIter = 100; % EM max iteration
-parm.tolerance = 1e-5; % EM loglikelihood tolerance
+parm.tolerance = 1e-3; % EM loglikelihood tolerance
 parm.sigma2 = 0;
 parm.w = 0.5; % outlier_ratio
 parm.mean_xform = 1; % translate to the mean position
 parm.weight = 0;
-parm.opti_maxIter = 10; % max iteration for optimization
+parm.opti_maxIter = 2; % max iteration for optimization
 parm.opti_tolerance = 1e-3; % tolerance fot optimization
 parm.neighbours = 30; % Neighbour
-parm.alimit = 1; % Alpha max
+parm.alimit = 5; % Alpha max
 parm.lambda = 0.2; % lambda
 
-tic
 xform = LSGCPD(pc_source, pc_target, parm);
-toc
-disp('Time comsumption')
 
 % Show result
 figure(2)
