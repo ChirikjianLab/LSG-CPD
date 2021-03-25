@@ -16,24 +16,12 @@ pc_target = pcread(target_file);
 
 % Initial
 figure(1)
-pcshowpair(pc_target, pc_source);
+ShowPointCloudPair(pc_target, pc_source, 'backgroundColor', 'white', 'grid', 'hide', 'axis', 'on')
 
-% Registration
-parm.maxIter = 100; % EM max iteration
-parm.tolerance = 1e-3; % EM loglikelihood tolerance
-parm.sigma2 = 0;
-parm.w = 0.5; % outlier_ratio
-parm.mean_xform = 1; % translate to the mean position
-parm.weight = 0;
-parm.opti_maxIter = 2; % max iteration for optimization
-parm.opti_tolerance = 1e-3; % tolerance fot optimization
-parm.neighbours = 30; % Neighbour
-parm.alimit = 5; % Alpha max
-parm.lambda = 0.2; % lambda
-
-xform = LSGCPD(pc_source, pc_target, parm);
+xform = LSGCPD(pc_source, pc_target, 'outlierRatio', 0.5, ...
+               'xform2center', 'true', 'maxPlaneRatio', 5);
 
 % Show result
 figure(2)
 pc_xform = pctransform(pc_source, xform);
-pcshowpair(pc_target, pc_xform);
+ShowPointCloudPair(pc_target, pc_xform, 'backgroundColor', 'white', 'grid', 'hide', 'axis', 'on')

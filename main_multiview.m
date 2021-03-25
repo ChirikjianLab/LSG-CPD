@@ -11,8 +11,16 @@ clear
 clc
 close all
 
-model_name = "Happy";
-num_pc = 15;
+model_name = "Dragon";
+
+if strcmp(model_name, 'Happy') || strcmp(model_name, 'Dragon')
+    num_pc = 15;
+else
+    if strcmp(model_name, 'Armadillo')
+        num_pc = 12;
+    end
+end
+
 
 % --------------- Load data ---------------
 path = strcat("data/multiview/", model_name, '/');
@@ -29,24 +37,11 @@ figure
 ShowPointClouds(pc_merge, 'backgroundColor', 'white', 'grid', 'hide', 'axis', 'hide', 'dataset', model_name);
 title('Randomly Initialized Point Clouds')
 
-% --------------- Registration ---------------
-parm.maxIter = 50; % EM max iteration
-parm.tolerance = 1e-5; % EM loglikelihood tolerance
-parm.sigma2 = 0;
-parm.w = 0.5; % outlier_ratio
-parm.mean_xform = 0; % translate to the mean position
-parm.weight = 0;
-parm.opti_maxIter = 2; % max iteration for optimization
-parm.opti_tolerance = 1e-3; % tolerance fot optimization
-parm.neighbours = 10;
-parm.alimit = 30;
-parm.lambda = 0.2;
-
 xform_rel = cell(1, num_pc-1); % relative xform
 xform_abs = cell(1, num_pc);   % absolute xform
 
 for i = 1 : num_pc-1
-    xform_rel{i} = LSGCPD(pc{i+1}, pc{i}, parm);
+    xform_rel{i} = LSGCPD(pc{i+1}, pc{i}, 'outlierRatio', 0.5);
 end
 
 xform_abs{1} = eye(4);
@@ -64,6 +59,6 @@ for i = 2 : num_pc
 end
 
 pc_result_merge = MergePointClouds(pc_result, 'pointCloud');
-pc_result_merge = pcdenoise(pc_result_merge, 'Threshold', 1, 'NumNeighbors', 50);
+% pc_result_merge = pcdenoise(pc_result_merge, 'Threshold', 1, 'NumNeighbors', 50);
 figure
 ShowPointClouds(pc_result_merge, 'backgroundColor', 'white', 'grid', 'hide', 'axis', 'hide', 'dataset', model_name);

@@ -40,7 +40,8 @@ end
 
 figure(1)
 pc_gt_merge = MergePointClouds(pc_gt, 'pointCloud');
-pcshow(pc_gt_merge)
+ShowPointClouds_Lidar(pc_gt_merge, 'backgroundColor', 'white', 'grid', 'hide', 'axis', 'hide');
+view(0, 0)
 
 % Draw ground truth trajectory
 Traj_gt = zeros(3, num_pc);
@@ -59,36 +60,18 @@ hold off
 % Show Merged Point Cloud before Registration
 figure(2)
 pc_init = MergePointClouds(pc, 'pointCloud');
-pcshow(pc_init)
+ShowPointClouds_Lidar(pc_init, 'backgroundColor', 'white', 'grid', 'hide', 'axis', 'hide');
+view(0, 0)
+%% Registration 
 
-%--------------- Registration ---------------
-parm.maxIter = 50; % EM max iteration
-parm.tolerance = 1e-2; % EM loglikelihood tolerance
-parm.sigma2 = 0; % sigma is autonomously evaluated
-parm.w = 0.05; % outlier_ratio
-parm.mean_xform = 0; % translate to the mean position
-parm.weight = 0;
-parm.opti_maxIter = 2; % max iteration for optimization
-parm.opti_tolerance = 1e-3; % tolerance fot optimization
-parm.neighbours = 10; % Neighbour
-parm.alimit = 30; % Alpha max
-parm.lambda = 0.2; % lambda
-
-verbose = input('Verbose? 1-Yes; 0-No: ');
 g_relative = cell(1, num_pc - 1);
 xform = cell(1, num_pc - 1);
 
-tic
 for i = 1 : num_pc - 1
-    [xform{i}] = LSGCPD(pc{i + 1}, pc{i}, parm);
+    [xform{i}] = LSGCPD(pc{i + 1}, pc{i}, 'outlierRatio', 0.05, '');
     g_relative{i} = single([xform{i}.Rotation', xform{i}.Translation'; 0, 0, 0, 1]);
-    
-    if verbose == 1
-        disp(['Progress: ', num2str(i), '/' num2str(num_pc - 1), ';'])
-    end
+    disp(['Progress: ', num2str(i), '/' num2str(num_pc - 1), ';'])
 end
-toc
-disp('LPP time comsumption')
 
 
 % --------------- Result Visualization ---------------
@@ -105,7 +88,7 @@ for i = 1 : num_pc - 1
 end
 
 % merge and visualize
-[pc_merge] = pcdownsample(MergePointClouds(pc_xform, 'pointCloud'), 'gridAverage', 1.2);
+pc_merge = MergePointClouds(pc_xform, 'pointCloud');
 figure(6)
 % pcshow(pc_merge)
 ShowPointClouds_Lidar(pc_merge, 'backgroundColor', 'white', 'grid', 'hide', 'axis', 'hide');

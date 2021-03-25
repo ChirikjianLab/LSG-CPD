@@ -3,53 +3,158 @@
 % Johns Hopkins University
 % Nov 6th, 2020
 
-function [tform] = LSGCPD(source, target, parm, varargin)
+function [tform] = LSGCPD(source, target, varargin)
 
-% --------------- Load Data ---------------
-X = gpuArray(source.Location); % source
-Y = gpuArray(target.Location); % target (GMM)
+% --------------------------- varargin ------------------------------------
+flag = cellfun(@isequal, varargin, repmat({'maxIter'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.maxIter = varargin{idx};
+else
+    parm.maxIter = 50;
+end
 
-% volume of bounding cube
-V = 1 ^ 3 * (max(Y(:, 1)) - min(Y(:, 1))) *  ...
+flag = cellfun(@isequal, varargin, repmat({'tolerance'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.tolerance = varargin{idx};
+else
+    parm.tolerance = 1e-3;
+end
+
+flag = cellfun(@isequal, varargin, repmat({'outlierRatio'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.w = varargin{idx};
+else
+    parm.w = 0.1;
+end
+
+flag = cellfun(@isequal, varargin, repmat({'truncationThreshold'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.truncate_threshold = varargin{idx};
+else
+    parm.truncate_threshold = 0.19;
+end
+
+flag = cellfun(@isequal, varargin, repmat({'optimizationIter'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.opti_maxIter = varargin{idx};
+else
+    parm.opti_maxIter = 2;
+end
+
+flag = cellfun(@isequal, varargin, repmat({'optimizationTolerance'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.opti_tolerance = varargin{idx};
+else
+    parm.opti_tolerance = 1e-3;
+end
+
+flag = cellfun(@isequal, varargin, repmat({'neighbours'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.neighbours = varargin{idx};
+else
+    parm.neighbours = 10;
+end
+
+flag = cellfun(@isequal, varargin, repmat({'maxPlaneRatio'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    parm.alimit = varargin{idx};
+else
+    parm.alimit = 30;
+end
+
+% --------------------------- Load Data -----------------------------------
+flag = cellfun(@isequal, varargin, repmat({'dataType'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    if strcmp(varargin{idx}, 'array')
+        parm.output = 1;
+        X = source;
+        Y = target;
+    else
+        if strcmp(varargin{idx}, 'pointCloud')
+            parm.output = 0;
+            X = gpuArray(source.Location); % source
+            Y = gpuArray(target.Location); % target (GMM)
+        else
+            error('Input data type unsupported.')
+        end
+    end
+else
+    parm.output = 0;
+    X = gpuArray(source.Location); % source
+    Y = gpuArray(target.Location); % target (GMM)
+end
+
+% ----------------------volume of bounding cube----------------------------
+V = (max(Y(:, 1)) - min(Y(:, 1))) *  ...
     (max(Y(:, 2)) - min(Y(:, 2))) * ...
     (max(Y(:, 3)) - min(Y(:, 3))); 
 
-% --------------- Confidence Filtering ---------------
-if parm.weight ~= 0
-    % Depth of points
-    X_depth = X(:, 3);
-    Y_depth = Y(:, 3);
-    
-    % Confidence of points
-    confidence_X = confidence_filter(X_depth);
-    confidence_Y = confidence_filter(Y_depth);
-    
-    % Truncate the points if confidence < threshold
-    X = X(confidence_X > parm.truncate_threshold, :);
-    Y = Y(confidence_Y > parm.truncate_threshold, :);
-    % Truncate the corresponding confidence
-    confidence_X = confidence_X(confidence_X > parm.truncate_threshold, :);
-    confidence_Y = confidence_Y(confidence_Y > parm.truncate_threshold, :);
-    
-    % Size of points
-    N = size(X, 1); 
-    M = size(Y, 1);
-    
-    % Compute surface normal and variation
-    [Normal_cpu, Curvature] = findPointNormals(gather(Y), parm.neighbours);  
-    
-    % pi(m)
-    f_Y = confidence_Y ./ sum(confidence_Y);
+% ------------------------ Confidence Filtering ---------------------------
+flag = cellfun(@isequal, varargin, repmat({'confidenceFilter'},...
+    size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    if strcmp(varargin{idx}, 'true')
+        % Depth of points
+        X_depth = X(:, 3);
+        Y_depth = Y(:, 3);
+        
+        % Confidence of points
+        confidence_X = confidence_filter(X_depth);
+        confidence_Y = confidence_filter(Y_depth);
+        
+        % Truncate the points if confidence < threshold
+        X = X(confidence_X > parm.truncate_threshold, :);
+        Y = Y(confidence_Y > parm.truncate_threshold, :);
+        % Truncate the corresponding confidence
+        confidence_X = confidence_X(confidence_X > parm.truncate_threshold, :);
+        confidence_Y = confidence_Y(confidence_Y > parm.truncate_threshold, :);
+        
+        % Size of points
+        N = size(X, 1);
+        M = size(Y, 1);
+        
+        % Compute surface normal and variation
+        [Normal_cpu, Curvature] = findPointNormals(gather(Y), parm.neighbours);
+        
+        % pi(m)
+        f_Y = confidence_Y ./ sum(confidence_Y);
+    else
+        
+        % Size of points
+        N = size(X, 1);
+        M = size(Y, 1);
+        
+        % Confidence is simply one if not weighted
+        confidence_X = ones(N, 1);
+        
+        % Compute surface normal and variation
+        [Normal_cpu, Curvature] = findPointNormals(target.Location, ...
+                                                   parm.neighbours);
+        
+        % pi(m)
+        f_Y = single(ones(size(Y, 1), 1)) ./ size(Y, 1);
+    end
 else
     % Size of points
     N = size(X, 1);
-    M = size(Y, 1); 
+    M = size(Y, 1);
     
     % Confidence is simply one if not weighted
     confidence_X = ones(N, 1);
     
     % Compute surface normal and variation
-    [Normal_cpu, Curvature] = findPointNormals(target.Location, parm.neighbours);
+    [Normal_cpu, Curvature] = findPointNormals(target.Location, ...
+                                               parm.neighbours);
     
     % pi(m)
     f_Y = single(ones(size(Y, 1), 1)) ./ size(Y, 1);
@@ -57,15 +162,20 @@ end
 
 Normal = gpuArray(Normal_cpu);
 
-% --------------- Compute centroid and xform to centroid ---------------
-if parm.mean_xform == 1
-    % normalize to zero mean
-    xmean = mean(X);
-    ymean = mean(Y);    
-    X = X - xmean;
-    Y = Y - ymean;
-    xmean = gather(xmean);
-    ymean = gather(ymean);
+% ------------------ Compute centroid and xform to centroid ---------------
+flag = cellfun(@isequal, varargin, repmat({'xform2center'}, size(varargin)));
+parm.mean_xform = 0;
+if any(flag)
+    idx = circshift(flag,1);
+    if strcmp(varargin{idx}, 'true')
+        parm.mean_xform = 1;
+        xmean = mean(X);
+        ymean = mean(Y);
+        X = X - xmean;
+        Y = Y - ymean;
+        xmean = gather(xmean);
+        ymean = gather(ymean);
+    end
 end
 
 
@@ -91,8 +201,10 @@ E2X_cpu = gather(E2 * X);
 E3X_cpu = gather(E3 * X);
 
 % --------------- Initialize sigma2 ---------------
-if parm.sigma2 ~= 0
-    sigma2 = parm.sigma2;
+flag = cellfun(@isequal, varargin, repmat({'sigma2'}, size(varargin)));
+if any(flag)
+    idx = circshift(flag,1);
+    sigma2 = varargin{idx};
 else
     sigma2 = 0;
     for i = 1:3
@@ -102,6 +214,7 @@ else
 end
 
 % Pre-calculations---------------------------------------------------------
+parm.lambda = 0.2; % lambda
 a = (2 ./ (1 + exp(parm.lambda .* (3 - 1 ./ Curvature))) - 1) .* parm.alimit;
 vol = (a + 1) .^ (1 / 2);
 f_Y = f_Y .* vol;
@@ -167,8 +280,12 @@ if parm.mean_xform == 1
 end
 
 % return transform
-tform = rigid3d(R', t');
 
+if parm.output == 1
+    tform = [R, t; 0 0 0 1];
+else
+    tform = rigid3d(R', t');
+end
 end
 
 %---------------------------Utility-Functions------------------------------
@@ -215,11 +332,14 @@ gE4X_M_0 = reshape(pagemtimes(g_E4_X, M_0), 1, 3 * N);
 gE5X_M_0 = reshape(pagemtimes(g_E5_X, M_0), 1, 3 * N);
 gE6X_M_0 = reshape(pagemtimes(g_E6_X, M_0), 1, 3 * N);
 
-g_gradient = 2 .* ([gE1X_M_0; gE2X_M_0; gE3X_M_0; gE4X_M_0; gE5X_M_0; gE6X_M_0] * gX_flatten...
-    - (M_1_flatten * [g_E1_X_flatten, g_E2_X_flatten, g_E3_X_flatten, g_E4_X_flatten, g_E5_X_flatten, g_E6_X_flatten])');
+g_gradient = 2 .* ([gE1X_M_0; gE2X_M_0; gE3X_M_0; gE4X_M_0; gE5X_M_0; ...
+                    gE6X_M_0] * gX_flatten  - (M_1_flatten * ...
+                    [g_E1_X_flatten, g_E2_X_flatten, g_E3_X_flatten,...
+                     g_E4_X_flatten, g_E5_X_flatten, g_E6_X_flatten])');
 
-H = 2 .* ([gE1X_M_0; gE2X_M_0; gE3X_M_0; gE4X_M_0; gE5X_M_0; gE6X_M_0] * [g_E1_X_flatten, g_E2_X_flatten, g_E3_X_flatten, g_E4_X_flatten, g_E5_X_flatten, g_E6_X_flatten]);
-
+H = 2 .* ([gE1X_M_0; gE2X_M_0; gE3X_M_0; gE4X_M_0; gE5X_M_0; gE6X_M_0] * ...
+          [g_E1_X_flatten, g_E2_X_flatten, g_E3_X_flatten, ...
+           g_E4_X_flatten, g_E5_X_flatten, g_E6_X_flatten]);
 end
 
 %--------------------------------------------------------------------------
