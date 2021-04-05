@@ -11,7 +11,7 @@ clear
 clc
 close all
 
-model_name = "Dragon";
+model_name = "Happy";
 
 if strcmp(model_name, 'Happy') || strcmp(model_name, 'Dragon')
     num_pc = 15;
