@@ -215,7 +215,7 @@ end
 
 % Pre-calculations---------------------------------------------------------
 parm.lambda = 0.2; % lambda
-a = (2 ./ (1 + exp(parm.lambda .* (3 - 1 ./ Curvature))) - 1) .* parm.alimit;
+a = max(2 ./ (1 + exp(parm.lambda .* (3 - 1 ./ Curvature))) - 1, 0) .* parm.alimit;
 vol = (a + 1) .^ (1 / 2);
 f_Y = f_Y .* vol;
 % estimate outlier weight--------------------------------------------------
