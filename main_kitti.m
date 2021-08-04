@@ -9,7 +9,7 @@ clear
 close all
 
 % Load point cloud
-path = "data/kitti/Sequence_07/";
+path = "/home/saintsbury/Dropbox/Projects/ICCV2021/data/kitti/Sequence_07/";
 num_pc = 551;
 pc = cell(1, num_pc);
 pc_file = cell(1, num_pc);
@@ -68,7 +68,7 @@ g_relative = cell(1, num_pc - 1);
 xform = cell(1, num_pc - 1);
 
 for i = 1 : num_pc - 1
-    [xform{i}] = LSGCPD(pc{i + 1}, pc{i}, 'outlierRatio', 0.05, '');
+    [xform{i}] = LSGCPD(pc{i + 1}, pc{i}, 'outlierRatio', 0.05);
     g_relative{i} = single([xform{i}.Rotation', xform{i}.Translation'; 0, 0, 0, 1]);
     disp(['Progress: ', num2str(i), '/' num2str(num_pc - 1), ';'])
 end
