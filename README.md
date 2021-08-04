@@ -19,6 +19,8 @@ Main codes are contained within __LSGCPD.m__.
 3. Lounge Experiment: run __main_lounge.m__
 4. Kitti Experiment: run __main_kitti.m__
 
-
+## Acknowledge
+Normal and curvature estimation function is cited from:
+Zachary Taylor (2021). Find 3D Normals and Curvature (https://www.mathworks.com/matlabcentral/fileexchange/48111-find-3d-normals-and-curvature), MATLAB Central File Exchange. Retrieved August 4, 2021.
 ## TODO
 We are also working on implementing the method on C++. Stay tuned.
