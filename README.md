@@ -1,6 +1,10 @@
 # LSG-CPD
 This repo contains the matlab implementation of CPD with Local Surface Geometry (LSG-CPD).
 
+[[Arxiv](https://arxiv.org/abs/2103.15039)] [[Supplementary](doc/supplementary)] [Data will be availble]
+
+For all inquiries regarding the code, please contact Weixiao Liu: mpewxl@nus.edu.sg
+
 ## Introduction
 CPD with Local Surface Geometry is a probabilistic rigid registration method.
 Compared to the original CPD (Link to CPD paper), it takes into account the local surface geometry in the construction of the Gaussian mixture models (GMM).
@@ -22,5 +26,7 @@ Main codes are contained within __LSGCPD.m__.
 ## Acknowledge
 Normal and curvature estimation function is cited from:
 Zachary Taylor (2021). Find 3D Normals and Curvature (https://www.mathworks.com/matlabcentral/fileexchange/48111-find-3d-normals-and-curvature), MATLAB Central File Exchange. Retrieved August 4, 2021.
+
 ## TODO
-We are also working on implementing the method on C++. Stay tuned.
+- [ ] Data
+- [ ] Add citation
