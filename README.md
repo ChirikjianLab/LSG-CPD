@@ -1,14 +1,15 @@
 # LSG-CPD
-This repo contains the matlab implementation of CPD with Local Surface Geometry (LSG-CPD).
-
-[[Arxiv](https://arxiv.org/abs/2103.15039)] [[Supplementary](doc/supplementary.pdf)] [Data will be availble]
+This repo contains codes of CPD with Local Surface Geometry (LSG-CPD).
 
 For all inquiries regarding the code, please contact Weixiao Liu: mpewxl@nus.edu.sg
 
-## Introduction
-CPD with Local Surface Geometry is a probabilistic rigid registration method.
-Compared to the original CPD (Link to CPD paper), it takes into account the local surface geometry in the construction of the Gaussian mixture models (GMM).
-Main codes are contained within __LSGCPD.m__.
+## Publication
+Weixiao Liu, [Hongtao Wu](https://hongtaowu67.github.io), [Gregory Chirikjian](https://www.eng.nus.edu.sg/me/staff/chirikjian-gregory-s/), "LSG-CPD: Coherent Point Drift with Local Surface Geometry for Point Cloud Registration," Accepted to ICCV 2021
+
+[[Arxiv](https://arxiv.org/abs/2103.15039)] [[Supplementary](doc/supplementary.pdf)] [[Video](https://youtu.be/1lxz9Uu-GXI)] [Data will be availble]
+
+## Abstact
+Probabilistic point cloud registration methods are becoming more popular because of their robustness. However, unlike point-to-plane variants of iterative closest point (ICP) which incorporate local surface geometric information such as surface normals, most probabilistic methods (e.g., coherent point drift (CPD)) ignore such information and build Gaussian mixture models (GMMs) with isotropic Gaussian covariances. This results in sphere-like GMM components which only penalize the point-to-point distance between the two point clouds. In this paper, we propose a novel method called CPD with Local Surface Geometry (LSG-CPD) for rigid point cloud registration. Our method adaptively adds different levels of point-to-plane penalization on top of the point-to-point penalization based on the flatness of the local surface. This results in GMM components with anisotropic covariances. We formulate point cloud registration as a maximum likelihood estimation (MLE) problem and solve it with the Expectation-Maximization (EM) algorithm. In the E step, we demonstrate that the computation can be recast into simple matrix manipulations and efficiently computed on a GPU. In the M step, we perform an unconstrained optimization on a matrix Lie group to efficiently update the rigid transformation of the registration. The proposed method outperforms state-of-the-art algorithms in terms of accuracy and robustness on various datasets captured with range scanners, RGBD cameras, and LiDARs. Also, it is significantly faster than modern implementations of CPD. 
 
 ## Installation
 1. Install Matlab
@@ -18,10 +19,11 @@ Main codes are contained within __LSGCPD.m__.
     3. Statistics and Machine Learning Toolbox
 
 ## Usage
-1. Outlier Experiment: run  __main_outlier.m__
-2. Multi-view Experiment: in __main_multiveiw.m__, set the model and the corresponding view number you want to play with. And just run the script.
-3. Lounge Experiment: run __main_lounge.m__
-4. Kitti Experiment: run __main_kitti.m__
+0. Main codes are in ```LSGCPD.m```
+1. Outlier Experiment: run  ```main_outlier.m```
+2. Multi-view Experiment: in ```main_multiveiw.m```, set the model and the corresponding view number you want to play with. And just run the script.
+3. Lounge Experiment: run ```main_lounge.m```
+4. Kitti Experiment: run ```main_kitti.m```
 
 ## Acknowledge
 Normal and curvature estimation function is cited from:
