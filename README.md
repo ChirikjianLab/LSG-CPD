@@ -1,7 +1,7 @@
 # LSG-CPD
 This repo contains the matlab implementation of CPD with Local Surface Geometry (LSG-CPD).
 
-[[Arxiv](https://arxiv.org/abs/2103.15039)] [[Supplementary](doc/supplementary)] [Data will be availble]
+[[Arxiv](https://arxiv.org/abs/2103.15039)] [[Supplementary](doc/supplementary.pdf)] [Data will be availble]
 
 For all inquiries regarding the code, please contact Weixiao Liu: mpewxl@nus.edu.sg
 
