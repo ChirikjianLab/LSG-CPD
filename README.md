@@ -1,7 +1,7 @@
 # LSG-CPD
 This repo contains codes of CPD with Local Surface Geometry (LSG-CPD).
 
-For all inquiries regarding the code, please contact Weixiao Liu: mpewxl@nus.edu.sg
+For all inquiries regarding the code, please contact Weixiao Liu: wliu72@jhu.edu
 
 ## Publication
 Weixiao Liu, [Hongtao Wu](https://hongtaowu67.github.io), [Gregory Chirikjian](https://www.eng.nus.edu.sg/me/staff/chirikjian-gregory-s/), LSG-CPD: Coherent Point Drift with Local Surface Geometry for Point Cloud Registration, Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), 2021, pp. 15293-15302.
